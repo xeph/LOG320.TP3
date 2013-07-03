@@ -19,16 +19,17 @@ Numero piece
 
 public class Board {
 	private static final Board instance = new Board();
-	public static int[][] board = new int[8][8];
+	public int[][] board = new int[8][8];
 	
 	/**
 	 * Prints the board to the console
 	 */
-	public static final void printBoard() {
+	public final void printBoard() {
 		for(int[] row : board) {
 			for (int cell : row) {
 	            System.out.print(cell + "\t");
 	        }
+			System.out.println();
         }
 	}
 	

@@ -3,6 +3,7 @@ package Networking;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import Board.Board;
@@ -43,7 +44,7 @@ public class Client {
 			in.close();
 			out.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 		}
 	}
 	
@@ -53,6 +54,7 @@ public class Client {
 	 */
 	public final void sendToServer(String move) {
 		out.println(move);
+		out.flush();
 	}
 	
 	/**
@@ -63,42 +65,65 @@ public class Client {
 		char cmd = 0;
 		
 		try {
-			cmd = (char)in.read(buffer, 0, in.available());
+			in.read(buffer, 0, in.available()); // read from the socket
+			cmd = (char) buffer[0]; // extract the command
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 		}
 		
-		if (cmd == '1' || cmd == '2') {
-			String s = new String(buffer).trim();
-	        String[] boardValues;
-	        boardValues = s.split(" ");
-	        int x=0,y=0;
-	        for(int i=0; i<boardValues.length;i++){
-	            Board.board[x][y] = Integer.parseInt(boardValues[i]);
+		//System.out.println("Server code : " + cmd);
+		
+		if (cmd == '1' || cmd == '2') { // 1 = black players, 2 = white players
+			
+			if (cmd == '1')
+				System.out.println("Black player turn");
+			if (cmd == '2')
+				System.out.println("White player turn.");
+			
+			String s = ""; // convert ascii to string
+			try {
+				s = new String(buffer, "ASCII");
+			} catch (UnsupportedEncodingException e) {
+				System.err.println(e.getMessage());
+			}
+			
+			s = s.substring(2, s.length()); // remove command and space from string
+	        String[] boardValues = s.split(" "); // construct board values
+	        int x = 0;
+	        int y = 0;
+	        for(int i = 0; i<boardValues.length;i++){ // get the new board in memory
+	        	Board.getInstance().board[x][y] = Integer.parseInt(boardValues[i]);
 	            x++;
 	            if(x == 8){
 	                x = 0;
 	                y++;
+	                if (y == 8)
+	                	break;
 	            }
 	        }
-		} else if (cmd == '3') {
+		} else if (cmd == '3') { // last movement by opponent
 			byte[] aBuffer = new byte[16];
 			
 			try {
 				in.read(aBuffer, 0, in.available());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.err.println(e.getMessage());
 			}
 			
-			String s = new String(aBuffer);
+			String s = "";
+			try {
+				s = new String(buffer, "ASCII");
+			} catch (UnsupportedEncodingException e) {
+				System.err.println(e.getMessage());
+			}
 			System.out.println("Dernier coup : "+ s);
 	       	System.out.println("Entrez votre coup : ");
-		} else if (cmd == '4') {
+		} else if (cmd == '4') { // invalid move
 			System.out.println("Coup invalide, entrez un nouveau coup : ");
-		} else {
-			System.out.println("Code serveur invalide.");
+		} else { // invalid command
+			System.err.println("Invalid server code.");
 		}
+		out.flush();
 	}
 	
 	/**
