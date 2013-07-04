@@ -2,6 +2,7 @@ package Main;
 
 import Board.Board;
 import Networking.Client;
+import Utilities.commandEnum;
 
 public class Main {
 
