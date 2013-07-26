@@ -1,4 +1,4 @@
-package Board;
+package game;
 
 public class Piece {
 	private int x;
@@ -9,11 +9,11 @@ public class Piece {
 		this.y = y;
 	}
 	
-	public int getX() {
+	public final int getX() {
 		return this.x;
 	}
 	
-	public int getY() {
+	public final int getY() {
 		return this.y;
 	}
 }
